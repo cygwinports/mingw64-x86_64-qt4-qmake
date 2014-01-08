@@ -1,0 +1,52 @@
+--- origsrc/qt-x11-opensource-src-4.7.1/src/corelib/plugin/qlibrary.cpp
++++ src/qt-x11-opensource-src-4.7.1/src/corelib/plugin/qlibrary.cpp
+@@ -508,7 +508,7 @@
+  */
+ bool QLibrary::isLibrary(const QString &fileName)
+ {
+-#if defined(Q_OS_WIN32) || defined(Q_OS_WINCE)
++#if defined(Q_OS_WIN32) || defined(Q_OS_WINCE) || defined(Q_OS_CYGWIN)
+     return fileName.endsWith(QLatin1String(".dll"), Qt::CaseInsensitive);
+ #elif defined(Q_OS_SYMBIAN)
+     // Plugin stubs are also considered libraries in Symbian.
+--- origsrc/qt-x11-opensource-src-4.6.2/src/corelib/plugin/qlibrary_unix.cpp
++++ src/qt-x11-opensource-src-4.6.2/src/corelib/plugin/qlibrary_unix.cpp
+@@ -152,6 +152,13 @@
+ 
+ #elif defined(Q_OS_SYMBIAN)
+         suffixes << QLatin1String(".dll");
++#elif defined(Q_OS_CYGWIN)
++        prefixes << QLatin1String("cyg");
++        if (!fullVersion.isEmpty()) {
++            suffixes << QString::fromLatin1("-%1.dll").arg(fullVersion);
++        } else {
++            suffixes << QLatin1String(".dll");
++        }
+ #else
+         if (!fullVersion.isEmpty()) {
+             suffixes << QString::fromLatin1(".so.%1").arg(fullVersion);
+--- origsrc/qt-x11-opensource-src-4.5.1/src/corelib/io/qprocess_unix.cpp	2009-04-21 18:57:41.000000000 -0500
++++ src/qt-x11-opensource-src-4.5.1/src/corelib/io/qprocess_unix.cpp	2009-06-02 03:45:49.703763800 -0500
+@@ -538,6 +538,8 @@ static char **_q_dupEnvironment(const QS
+     // copy it over.
+ #if defined(Q_OS_MAC)
+     static const char libraryPath[] = "DYLD_LIBRARY_PATH";
++#elif defined(Q_OS_CYGWIN)
++    static const char libraryPath[] = "PATH";
+ #else
+     static const char libraryPath[] = "LD_LIBRARY_PATH";
+ #endif
+--- origsrc/qt-everywhere-opensource-src-4.7.1/src/declarative/qml/qdeclarativeimport.cpp	2010-11-05 20:55:23.000000000 -0500
++++ src/qt-everywhere-opensource-src-4.7.1/src/declarative/qml/qdeclarativeimport.cpp	2010-12-28 05:50:10.899546600 -0600
+@@ -787,6 +787,11 @@ QString QDeclarativeImportDatabase::reso
+                          << QLatin1String("d.dll") // try a qmake-style debug build first
+ # endif
+                          << QLatin1String(".dll"));
++#elif defined(Q_OS_CYGWIN)
++    return resolvePlugin(qmldirPath, qmldirPluginPath, baseName,
++                         QStringList()
++                         << QLatin1String(".dll"),
++                         QLatin1String("cyg"));
+ #elif defined(Q_OS_SYMBIAN)
+     return resolvePlugin(qmldirPath, qmldirPluginPath, baseName,
+                          QStringList()

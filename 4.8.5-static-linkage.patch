@@ -1,0 +1,14 @@
+--- origsrc/qt-everywhere-opensource-src-4.8.5/mkspecs/features/qt_functions.prf	2013-06-07 00:17:00.000000000 -0500
++++ src/qt-everywhere-opensource-src-4.8.5/mkspecs/features/qt_functions.prf	2014-01-06 23:20:17.215078700 -0600
+@@ -82,6 +82,11 @@ defineTest(qtAddLibrary) {
+         QMAKE_LFLAGS *= -L/opt/lsb/lib
+         QMAKE_LFLAGS *= --lsb-shared-libs=$${LIB_NAME}$${QT_LIBINFIX}
+     }
++    cygwin-*:static {
++        isEqual(LIB_NAME, QtGui) LINKAGE += $$QMAKE_LIBS_X11
++        isEqual(LIB_NAME, QtDBus) LINKAGE += -ldbus-1
++        isEqual(LIB_NAME, QtCore) LINKAGE += $$QMAKE_LIBS
++    }
+     LIBS += $$LINKAGE
+     export(LIBS)
+     export(INCLUDEPATH)

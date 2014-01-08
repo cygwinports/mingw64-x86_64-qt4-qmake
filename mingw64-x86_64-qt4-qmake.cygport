@@ -1,0 +1,74 @@
+TOOLCHAIN_TARGET="x86_64-w64-mingw32"
+inherit toolchain
+
+NAME="mingw64-x86_64-qt4-qmake"
+VERSION=4.8.5
+RELEASE=2
+CATEGORY="Devel"
+SUMMARY="Qt4 development tools for Win64 toolchain"
+DESCRIPTION="This package does NOT contain cygwin binaries.  Instead, it
+contains msvcrt-linked binaries (aka 'mingw').  It is for use with the
+mingw-gcc cross compiler, and installs into the
+/usr/x86_64-w64-mingw32/sys-root/mingw/{lib,include} directories."
+HOMEPAGE="http://qt-project.org/"
+SRC_URI="http://download.qt-project.org/official_releases/qt/${VERSION%.*}/${VERSION}/qt-everywhere-opensource-src-${VERSION}.tar.gz"
+SRC_DIR="qt-everywhere-opensource-src-${VERSION}"
+PATCH_URI="
+	4.5.3-makedepend.patch
+	4.8.1-cygwin-mkspecs.patch
+	4.8.1-cygwin-dlopen.patch
+	4.8.1-cygwin-posix.patch
+	4.8.5-qmake-implib.patch
+	4.8.5-libiconv.patch
+	4.8.5-static-linkage.patch
+"
+
+src_compile() {
+	cd ${B}
+	${S}/configure \
+		-prefix ${TOOLCHAIN_PREFIX} \
+		-bindir ${TOOLCHAIN_BINDIR} \
+		-headerdir ${TOOLCHAIN_INCLUDEDIR}/qt4 \
+		-libdir ${TOOLCHAIN_LIBDIR} \
+		-plugindir ${TOOLCHAIN_LIBDIR}/qt4/plugins \
+		-datadir ${TOOLCHAIN_DATADIR}/qt4 \
+		-sysconfdir ${TOOLCHAIN_PREFIX}/etc \
+		-translationdir ${TOOLCHAIN_DATADIR}/qt4/translations \
+		-platform cygwin-g++ \
+		-confirm-license -opensource \
+		-release -no-debug -static -fast -continue -verbose \
+		-qdbus -qt3support -system-zlib -dbus-linked -iconv \
+		-no-declarative -no-multimedia -no-phonon -no-opengl -no-script \
+		-no-scripttools -no-svg -no-webkit -no-xmlpatterns \
+		-no-gif -no-libjpeg -no-libmng -no-libpng -no-libtiff -no-openssl \
+		-no-sm -no-xvideo -no-xsync -no-xinerama -no-xcursor -no-xfixes \
+		-no-xrandr -no-xrender -no-mitshm -no-freetype -no-fontconfig \
+		-no-xinput -no-xkb -no-xshape -no-cups -no-openvg -no-glib -no-icu \
+		-no-sql-db2 -no-sql-ibase -no-sql-oci -no-sql-mysql \
+		-no-sql-psql -no-sql-odbc -no-sql-sqlite -no-sql-tds \
+		-no-rpath -no-reduce-exports \
+		-nomake demos -nomake docs -nomake examples -nomake translations \
+		|| error "configure failed"
+
+	cygmake sub-uic3-all-ordered
+	cygmake -C tools/linguist sub-lconvert sub-lrelease sub-lupdate
+	cygmake -C tools/qdbus sub-qdbuscpp2xml sub-qdbusxml2cpp
+}
+
+src_install() {
+	local hostbindir=/usr/lib/qt4/${TOOLCHAIN_TARGET}/bin
+
+	cd ${B}/bin
+
+	dodir /usr/bin
+	exeinto $hostbindir
+	for x in *.exe
+	do
+		doexe $x
+		dosym ../${hostbindir#/usr/}/$x /usr/bin/${TOOLCHAIN_TARGET}-${x%.exe}-qt4
+	done
+
+	dodoc ${S}/changes-${PV} ${S}/GPL_* ${S}/LICENSE.* ${S}/OPENSOURCE-NOTICE.TXT
+}
+
+DIFF_EXCLUDES="3rdparty demos doc examples"
