@@ -2,8 +2,8 @@ TOOLCHAIN_TARGET="x86_64-w64-mingw32"
 inherit toolchain
 
 NAME="mingw64-x86_64-qt4-qmake"
-VERSION=4.8.5
-RELEASE=2
+VERSION=4.8.6
+RELEASE=1
 CATEGORY="Devel"
 SUMMARY="Qt4 development tools for Win64 toolchain"
 DESCRIPTION="This package does NOT contain cygwin binaries.  Instead, it
