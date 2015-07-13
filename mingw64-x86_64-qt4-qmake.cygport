@@ -2,7 +2,7 @@ TOOLCHAIN_TARGET="x86_64-w64-mingw32"
 inherit toolchain
 
 NAME="mingw64-x86_64-qt4-qmake"
-VERSION=4.8.6
+VERSION=4.8.7
 RELEASE=1
 CATEGORY="Devel"
 SUMMARY="Qt4 development tools for Win64 toolchain"
@@ -17,7 +17,7 @@ PATCH_URI="
 	4.5.3-makedepend.patch
 	4.8.1-cygwin-mkspecs.patch
 	4.8.1-cygwin-dlopen.patch
-	4.8.1-cygwin-posix.patch
+	4.8.7-cygwin-posix.patch
 	4.8.5-qmake-implib.patch
 	4.8.5-libiconv.patch
 	4.8.5-static-linkage.patch
